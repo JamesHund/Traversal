@@ -46,6 +46,15 @@ public class SU24129429 {
 			
 			//moves
 			File movesFile = new File(args[1]);
+			Scanner scMoves;
+			try {
+				scMoves = new Scanner(movesFile);
+				moves = scMoves.nextLine();
+				scMoves.close();
+			} catch (FileNotFoundException e) {
+				System.err.println("Moves file not found");
+			}
+			
 		}
 		
 		

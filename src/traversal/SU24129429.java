@@ -9,7 +9,9 @@ public class SU24129429 {
 	//declaring variables
 	public static int[] boardSize = new int[2];
 	public static Character[][] board;
-	public static Character[][] movers;
+	public static Character[][] moversBoard;
+	public static int[][] horizMovers;
+	public static int[][] vertMovers;
 	public static int[] playerPos = new int[2];
 	public static String moves;
 
@@ -68,7 +70,7 @@ public class SU24129429 {
 			
 			//initialize board and movers arrays
 			board = new Character[boardSize[0]][boardSize[1]];
-			movers = new Character[boardSize[0]][boardSize[1]];
+			moversBoard = new Character[boardSize[0]][boardSize[1]];
 			
 			//populates board and movers arrays with values
 			for(int y = 0; y < boardSize[1]; y++) {
@@ -82,7 +84,7 @@ public class SU24129429 {
 						temp = '.';
 					}else if(temp == 'l' || temp == 'r' || temp == 'u' || temp == 'd' //
 							|| temp == 'L' || temp == 'R' || temp == 'U' || temp == 'D') {
-						movers[x][y] = temp;
+						moversBoard[x][y] = temp;
 						temp = '.';
 					}
 					board[x][y] = temp;

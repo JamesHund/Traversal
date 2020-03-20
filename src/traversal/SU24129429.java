@@ -23,19 +23,34 @@ public class SU24129429 {
 		
 		//game logic
 		for (int m = 0; m < moves.length(); m++) {
+			int x = 0; //x offset
+			int y = 0; //y offset
 			switch(moves.charAt(m)) {
 				//UP
 				case 'k':
+					moveMovers(false);
+					y = -1;
 					break;
 				//DOWN
 				case 'j':
+					moveMovers(false);
+					y = 1;
 					break;
 				//LEFT
 				case 'h':
+					moveMovers(true);
+					x = -1;
 					break;
 				//RIGHT
 				case 'l':
+					moveMovers(true);
+					x = 1;
 					break;
+			}
+			if(!move(x,y)) {
+				System.out.println("Illegal move");
+				//print board
+				break;
 			}
 		}
 	}
@@ -51,6 +66,7 @@ public class SU24129429 {
 		}else {
 			//move veritical movers
 		}
+		
 	}
 	
 	//initializes fields
@@ -112,6 +128,7 @@ public class SU24129429 {
 	
 	//prints the board array
 	public static void printBoard() {
+		Character[][] tempBoard = new Character[boardSize[0]][boardSize[1]];
 		System.out.println("Board:");
 		for(int y = 0; y < boardSize[1]; y++) {
 			for(int x = 0; x < boardSize[0]; x++) {

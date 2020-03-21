@@ -2,6 +2,7 @@ package traversal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class SU24129429 {
@@ -20,6 +21,15 @@ public class SU24129429 {
 		System.out.println(args[0]);
 		System.out.println(args[1]);
 		initialize(args[0], args[1]);
+		//PUT CODE TO TEST METHODS HERE
+		//searchBoard(new Character[] {'x','t'});
+		
+		
+		
+		
+		
+		//END OF METHOD TESTING CODE
+		
 		
 		//game logic
 		for (int m = 0; m < moves.length(); m++) {
@@ -48,6 +58,10 @@ public class SU24129429 {
 					break;
 			}
 			if(!move(x,y)) {
+				if(("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
+					System.out.println("player won (mover on target)");
+					//print board
+				}
 				System.out.println("Illegal move");
 				//print board
 				break;
@@ -55,10 +69,28 @@ public class SU24129429 {
 		}
 	}
 	
+	//returns array list positions in board array where one or more characters are found
+	public static ArrayList<int[]> searchBoard(Character[] chars){
+		ArrayList<int[]> positions = new ArrayList<>();
+		for(int y = 0; y < boardSize[1]; y++) {
+			for(int x = 0; x < boardSize[0]; x++) {
+				for(int i = 0; i < chars.length; i++) {
+					if(chars[i] == board[x][y]) {
+						positions.add(new int[]{x,y});
+						//System.out.println("[ " + x + ", " + y + "]");
+						break;
+					}
+				}
+			}
+		}
+		return positions;
+	}
+	
 	//moves the player, returns false if illegal move
 	public static boolean move(int xOffset, int yOffset) {
 		return false;
 	}
+	
 	
 	public static void moveMovers(boolean isHorizontal) {
 		if (isHorizontal) {

@@ -11,8 +11,8 @@ public class SU24129429 {
 	public static int[] boardSize = new int[2];
 	public static Character[][] board;
 	public static Character[][] moversBoard;
-	public static int[][] horizMovers;
-	public static int[][] vertMovers;
+	public static ArrayList<int[]> horizMovers = new ArrayList<>();
+	public static ArrayList<int[]> vertMovers = new ArrayList<>();
 	public static int[] playerPos = new int[2];
 	public static String moves;
 
@@ -100,7 +100,20 @@ public class SU24129429 {
 		return false;
 	}
 	
-	
+	public static void moveMovers(boolean isHorizontal) {
+		if(isHorizontal) {
+			for(int[] mover : horizMovers) {
+				switch(mover[2]) {
+				case 0:
+					mover[0] = (mover[0] - 1);
+					//if(mover )
+				}
+			}
+		}else {
+			
+		}
+	}
+	/*
 	public static void moveMovers(boolean isHorizontal) {
 		ArrayList<int[]> positions;
 		Character[][] tempBoard = new Character[boardSize[0]][boardSize[1]];
@@ -140,6 +153,11 @@ public class SU24129429 {
 		}
 		
 	}
+	*/
+	
+	public static void activatePorts() {
+		//invert port states
+	}
 	
 	//sets the player's position
 		public static void setPlayerPos(int x, int y) {
@@ -175,9 +193,27 @@ public class SU24129429 {
 					if (temp == 's' || temp == 'S') {
 						setPlayerPos(x,y);
 						temp = '.';
-					}else if(temp == 'l' || temp == 'r' || temp == 'u' || temp == 'd' //
-							|| temp == 'L' || temp == 'R' || temp == 'U' || temp == 'D') {
-						moversBoard[x][y] = temp;
+					}else if(("lrudLRUD").contains("" + temp)){
+						int id = -1;
+						switch((""+temp).toLowerCase()) {
+							case "l":
+								id = 0;
+								break;
+							case "r":
+								id = 1;
+								break;
+							case "u":
+								id = 2;
+								break;
+							case "d":
+								id = 3;
+								break;
+						}
+						if(Character.isLowerCase(temp)) {
+							horizMovers.add(new int[] {x,y,id});
+						}else {
+							vertMovers.add(new int[] {x,y,id});
+						}
 						temp = '.';
 					}
 					board[x][y] = temp;

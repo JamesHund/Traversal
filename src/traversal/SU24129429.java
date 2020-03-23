@@ -25,9 +25,6 @@ public class SU24129429 {
 		//searchBoard(new Character[] {'x','t'});
 		
 		
-		
-		
-		
 		//END OF METHOD TESTING CODE
 		
 		
@@ -69,16 +66,28 @@ public class SU24129429 {
 		}
 	}
 	
-	//returns array list positions in board array where one or more characters are found
-	public static ArrayList<int[]> searchBoard(Character[] chars){
+	//returns array list of positions in board array where one or more characters are found
+	public static ArrayList<int[]> searchBoard(Character[] chars, boolean movers){
 		ArrayList<int[]> positions = new ArrayList<>();
-		for(int y = 0; y < boardSize[1]; y++) {
-			for(int x = 0; x < boardSize[0]; x++) {
-				for(int i = 0; i < chars.length; i++) {
-					if(chars[i] == board[x][y]) {
-						positions.add(new int[]{x,y});
-						//System.out.println("[ " + x + ", " + y + "]");
-						break;
+		if (!movers) {
+			for(int y = 0; y < boardSize[1]; y++) {
+				for(int x = 0; x < boardSize[0]; x++) {
+					for(int i = 0; i < chars.length; i++) {
+						if(chars[i] == board[x][y]) {
+							positions.add(new int[]{x,y});
+							break;
+						}
+					}
+				}
+			}
+		}else {
+			for(int y = 0; y < boardSize[1]; y++) {
+				for(int x = 0; x < boardSize[0]; x++) {
+					for(int i = 0; i < chars.length; i++) {
+						if(chars[i] == moversBoard[x][y]) {
+							positions.add(new int[]{x,y});
+							break;
+						}
 					}
 				}
 			}
@@ -93,14 +102,50 @@ public class SU24129429 {
 	
 	
 	public static void moveMovers(boolean isHorizontal) {
+		ArrayList<int[]> positions;
+		Character[][] tempBoard = new Character[boardSize[0]][boardSize[1]];
 		if (isHorizontal) {
-			//move horizontal movers
+			positions = searchBoard(new Character[] {'u','d','l','r'}, true);
 		}else {
-			//move veritical movers
+			positions = searchBoard(new Character[] {'U','D','L','R'}, true);
+		}
+		for (int[] pos : positions) {
+			int xOffset = 0;
+			int yOffset = 0;
+			switch (("" + moversBoard[pos[0]][pos[1]]).toLowerCase()) {
+				case "u":
+					yOffset = -1;
+					break;
+				case "d":
+					yOffset = 1;
+					break;
+				case "l":
+					xOffset = -1;
+					break;
+				case "r":
+					xOffset = 1;
+					break;
+			}
+			int x = (pos[0] + xOffset)%boardSize[0]+boardSize[0];
+			int y = (pos[1] + yOffset)%boardSize[1]+boardSize[1];
+			tempBoard[x][y] = moversBoard[pos[0]][pos[1]];
+			moversBoard[pos[0]][pos[1]] = null;
+		}
+		for(int y = 0; y < boardSize[1]; y++) {
+			for(int x = 0; x < boardSize[0]; x++) {
+				if (tempBoard[x][y] != null) {
+					moversBoard[x][y] = tempBoard[x][y];
+				}
+			}
 		}
 		
 	}
 	
+	//sets the player's position
+		public static void setPlayerPos(int x, int y) {
+			playerPos[0] = x;
+			playerPos[1] = y;
+		}
 	//initializes fields
 	public static void initialize(String boardPath, String movesPath) {
 		
@@ -139,7 +184,7 @@ public class SU24129429 {
 				}
 			}
 			scBoard.close();
-			printBoard();
+			printFullBoard();
 		} catch (FileNotFoundException e) {
 			System.err.println("board file not found");
 			System.exit(1);
@@ -158,22 +203,30 @@ public class SU24129429 {
 		
 	}
 	
-	//prints the board array
-	public static void printBoard() {
-		Character[][] tempBoard = new Character[boardSize[0]][boardSize[1]];
+	//prints the board array overlayed with the movers array
+	public static void printFullBoard() {
 		System.out.println("Board:");
+		for(int y = 0; y < boardSize[1]; y++) {
+			for(int x = 0; x < boardSize[0]; x++) {
+				if (moversBoard[x][y] != null){
+					System.out.print(moversBoard[x][y]);
+				}else{
+					System.out.print(board[x][y]);
+				}
+			}
+			System.out.print("\n");
+		}
+	}
+	
+	//prints the
+	public static void printMoversBoard() {
+		System.out.println("Movers Board:");
 		for(int y = 0; y < boardSize[1]; y++) {
 			for(int x = 0; x < boardSize[0]; x++) {
 				System.out.print(board[x][y]);
 			}
 			System.out.print("\n");
 		}
-	}
-	
-	//sets the player's position
-	public static void setPlayerPos(int x, int y) {
-		playerPos[0] = x;
-		playerPos[1] = y;
 	}
 	
 

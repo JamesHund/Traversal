@@ -12,7 +12,7 @@ public class SU24129429 {
 	public static Character[][] board;
 	public static ArrayList<int[]> horizMovers = new ArrayList<>(); //contains positions and types of movers
 	public static ArrayList<int[]> vertMovers = new ArrayList<>(); 
-	public static ArrayList<int[]> ports = new ArrayList<>(); //contains positions of ports
+	public static ArrayList<int[]> ports; //contains positions of ports
 	public static ArrayList<int[]> hSwitches; //contains positions of horiz switches
 	public static ArrayList<int[]> vSwitches; //contains positions of vertical switches
 	public static int[] playerPos = new int[2];
@@ -255,6 +255,7 @@ public class SU24129429 {
 		
 		hSwitches = searchBoard(new Character[] {'h','H'});
 		vSwitches = searchBoard(new Character[] {'v','V'});
+		ports = searchBoard(new Character[]{'p','P'});
 		
 	}
 	

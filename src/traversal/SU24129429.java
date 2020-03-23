@@ -10,9 +10,11 @@ public class SU24129429 {
 	//declaring variables
 	public static int[] boardSize = new int[2];
 	public static Character[][] board;
-	public static Character[][] moversBoard;
-	public static ArrayList<int[]> horizMovers = new ArrayList<>();
-	public static ArrayList<int[]> vertMovers = new ArrayList<>();
+	public static ArrayList<int[]> horizMovers = new ArrayList<>(); //contains positions and types of movers
+	public static ArrayList<int[]> vertMovers = new ArrayList<>(); 
+	public static ArrayList<int[]> ports = new ArrayList<>(); //contains positions of ports
+	public static ArrayList<int[]> hSwitches; //contains positions of horiz switches
+	public static ArrayList<int[]> vSwitches; //contains positions of vertical switches
 	public static int[] playerPos = new int[2];
 	public static String moves;
 
@@ -67,9 +69,8 @@ public class SU24129429 {
 	}
 	
 	//returns array list of positions in board array where one or more characters are found
-	public static ArrayList<int[]> searchBoard(Character[] chars, boolean movers){
+	public static ArrayList<int[]> searchBoard(Character[] chars){
 		ArrayList<int[]> positions = new ArrayList<>();
-		if (!movers) {
 			for(int y = 0; y < boardSize[1]; y++) {
 				for(int x = 0; x < boardSize[0]; x++) {
 					for(int i = 0; i < chars.length; i++) {
@@ -80,18 +81,6 @@ public class SU24129429 {
 					}
 				}
 			}
-		}else {
-			for(int y = 0; y < boardSize[1]; y++) {
-				for(int x = 0; x < boardSize[0]; x++) {
-					for(int i = 0; i < chars.length; i++) {
-						if(chars[i] == moversBoard[x][y]) {
-							positions.add(new int[]{x,y});
-							break;
-						}
-					}
-				}
-			}
-		}
 		return positions;
 	}
 	
@@ -104,56 +93,84 @@ public class SU24129429 {
 		if(isHorizontal) {
 			for(int[] mover : horizMovers) {
 				switch(mover[2]) {
-				case 0:
-					mover[0] = (mover[0] - 1);
-					//if(mover )
+					case 0:
+						mover[0] = (mover[0]-1);
+						if(mover[0]<0) {
+							mover[0] += boardSize[0];
+						}
+						break;
+					case 1:
+						mover[0] = (mover[0]+1);
+						if(mover[0]>= boardSize[0]) {
+							mover[0] -= boardSize[0];
+						}
+						break;
+					case 3:
+						mover[1] = (mover[1]-1);
+						if(mover[1]<0) {
+							mover[1] += boardSize[1];
+						}
+						break;
+					case 4:
+						mover[1] = (mover[1]+1);
+						if(mover[1]>= boardSize[1]) {
+							mover[1] -= boardSize[1];
+						}
+						break;
 				}
 			}
 		}else {
+			for(int[] mover : vertMovers) {
+				switch(mover[2]) {
+					case 0:
+						mover[0] = (mover[0]-1);
+						if(mover[0]<0) {
+							mover[0] += boardSize[0];
+						}
+						break;
+					case 1:
+						mover[0] = (mover[0]+1);
+						if(mover[0]>= boardSize[0]) {
+							mover[0] -= boardSize[0];
+						}
+						break;
+					case 3:
+						mover[1] = (mover[1]-1);
+						if(mover[1]<0) {
+							mover[1] += boardSize[1];
+						}
+						break;
+					case 4:
+						mover[1] = (mover[1]+1);
+						if(mover[1]>= boardSize[1]) {
+							mover[1] -= boardSize[1];
+						}
+						break;
+				}
+			}			
+		}
+	}
+	
+	public static void switchSwitches(boolean isHorizontal) {
+		if(isHorizontal) {
+			for(int[] pos : hSwitches) {
+				if(board[pos[0]][pos[1]] == 'h') {
+					board[pos[0]][pos[1]] = 'H';
+				}else {
+					board[pos[0]][pos[1]] = 'h';
+				}
+			}
 			
-		}
-	}
-	/*
-	public static void moveMovers(boolean isHorizontal) {
-		ArrayList<int[]> positions;
-		Character[][] tempBoard = new Character[boardSize[0]][boardSize[1]];
-		if (isHorizontal) {
-			positions = searchBoard(new Character[] {'u','d','l','r'}, true);
 		}else {
-			positions = searchBoard(new Character[] {'U','D','L','R'}, true);
-		}
-		for (int[] pos : positions) {
-			int xOffset = 0;
-			int yOffset = 0;
-			switch (("" + moversBoard[pos[0]][pos[1]]).toLowerCase()) {
-				case "u":
-					yOffset = -1;
-					break;
-				case "d":
-					yOffset = 1;
-					break;
-				case "l":
-					xOffset = -1;
-					break;
-				case "r":
-					xOffset = 1;
-					break;
-			}
-			int x = (pos[0] + xOffset)%boardSize[0]+boardSize[0];
-			int y = (pos[1] + yOffset)%boardSize[1]+boardSize[1];
-			tempBoard[x][y] = moversBoard[pos[0]][pos[1]];
-			moversBoard[pos[0]][pos[1]] = null;
-		}
-		for(int y = 0; y < boardSize[1]; y++) {
-			for(int x = 0; x < boardSize[0]; x++) {
-				if (tempBoard[x][y] != null) {
-					moversBoard[x][y] = tempBoard[x][y];
+			for(int[] pos : vSwitches) {
+				if(board[pos[0]][pos[1]] == 'v') {
+					board[pos[0]][pos[1]] = 'V';
+				}else {
+					board[pos[0]][pos[1]] = 'v';
 				}
 			}
 		}
-		
 	}
-	*/
 	
 	public static void activatePorts() {
 		//invert port states
@@ -181,7 +198,6 @@ public class SU24129429 {
 			
 			//initialize board and movers arrays
 			board = new Character[boardSize[0]][boardSize[1]];
-			moversBoard = new Character[boardSize[0]][boardSize[1]];
 			
 			//populates board and movers arrays with values
 			for(int y = 0; y < boardSize[1]; y++) {
@@ -237,18 +253,17 @@ public class SU24129429 {
 			System.err.println("Moves file not found");
 		}
 		
+		hSwitches = searchBoard(new Character[] {'h','H'});
+		vSwitches = searchBoard(new Character[] {'v','V'});
+		
 	}
 	
-	//prints the board array overlayed with the movers array
+	//prints the board array 
 	public static void printFullBoard() {
 		System.out.println("Board:");
 		for(int y = 0; y < boardSize[1]; y++) {
 			for(int x = 0; x < boardSize[0]; x++) {
-				if (moversBoard[x][y] != null){
-					System.out.print(moversBoard[x][y]);
-				}else{
-					System.out.print(board[x][y]);
-				}
+				System.out.print(board[x][y]);
 			}
 			System.out.print("\n");
 		}

@@ -1,5 +1,3 @@
-package traversal;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -24,69 +22,91 @@ public class SU24129429 {
 		System.out.println(args[1]);
 		initialize(args[0], args[1]);
 		//PUT CODE TO TEST METHODS HERE
-		//searchBoard(new Character[] {'x','t'});
-		
 		
 		//END OF METHOD TESTING CODE
 		
-		
 		//game logic
 		for (int m = 0; m < moves.length(); m++) {
-			int x = 0; //x offset
-			int y = 0; //y offset
-			switch(moves.charAt(m)) {
-				//UP
-				case 'k':
-					moveMovers(false);
-					y = -1;
-					break;
-				//DOWN
-				case 'j':
-					moveMovers(false);
-					y = 1;
-					break;
-				//LEFT
-				case 'h':
-					moveMovers(true);
-					x = -1;
-					break;
-				//RIGHT
-				case 'l':
-					moveMovers(true);
-					x = 1;
-					break;
-			}
-			if(!move(x,y)) {
+			if(!move(moves.charAt(m))) {
 				if(("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
 					System.out.println("player won (mover on target)");
 					//print board
 				}
-				System.out.println("Illegal move");
+				System.out.println("You've Lost");
 				//print board
 				break;
 			}
 		}
 	}
 	
-	//returns array list of positions in board array where one or more characters are found
-	public static ArrayList<int[]> searchBoard(Character[] chars){
-		ArrayList<int[]> positions = new ArrayList<>();
-			for(int y = 0; y < boardSize[1]; y++) {
-				for(int x = 0; x < boardSize[0]; x++) {
-					for(int i = 0; i < chars.length; i++) {
-						if(chars[i] == board[x][y]) {
-							positions.add(new int[]{x,y});
-							break;
-						}
-					}
-				}
-			}
-		return positions;
-	}
-	
 	//moves the player, returns false if illegal move
-	public static boolean move(int xOffset, int yOffset) {
-		return false;
+	public static boolean move(Character move) {
+		int x = 0; //x offset
+		int y = 0; //y offset
+		boolean horizontal = false;
+		switch(move) {
+			//UP
+			case 'k':
+				horizontal = false;
+				y = -1;
+				break;
+			//DOWN
+			case 'j':
+				horizontal = false;
+				y = 1;
+				break;
+			//LEFT
+			case 'h':
+				horizontal = true;
+				x = -1;
+				break;
+			//RIGHT
+			case 'l':
+				horizontal = true;
+				x = 1;
+				break;
+			default:
+				System.out.println("Incorrect move");
+				//print board
+				return false;
+		}
+		
+		//set player position
+		if(playerPos[0] + x < 0 || playerPos[0] + x == boardSize[0]) {
+			return true;
+		}else if(playerPos[1] + y < 0) {
+			setPlayerPos(playerPos[0], boardSize[1] - 1);
+		}else if(playerPos[1] + y == boardSize[1]){
+			setPlayerPos(playerPos[0], 0);
+		}else {
+			setPlayerPos(playerPos[0] + x, playerPos[1] + y);
+		}
+		moveMovers(horizontal);
+		switchSwitches(horizontal);
+		
+		int pX = playerPos[0];
+		int pY = playerPos[1];
+		
+		if(isMoverAtPosition(playerPos)) return false;
+		switch("" + board[pX][pY]){
+			case "k":
+			case "K":
+				useKey(playerPos);
+			case "H":
+			case "V":
+			case ".":
+			case "I": //inactive key
+			case "P":
+				return true;
+			case "t":
+			case "T":
+				System.out.println("You've won");
+				//print board
+				return true;
+			default:
+				return false;
+		}
+		
 	}
 	
 	public static void moveMovers(boolean isHorizontal) {
@@ -172,15 +192,52 @@ public class SU24129429 {
 		}
 	}
 	
-	public static void activatePorts() {
-		//invert port states
+	public static void useKey(int [] pos) {
+		board[pos[0]][pos[1]] = 'I';
+		for (int[] port : ports) {
+			if(board[port[0]][port[1]] == 'p') {
+				board[port[0]][port[1]] = 'P';
+			}else {
+				board[port[0]][port[1]] = 'p';
+			}
+		}
 	}
 	
+	//returns array list of positions in board array where one or more characters are found
+	public static ArrayList<int[]> searchBoard(Character[] chars){
+		ArrayList<int[]> positions = new ArrayList<>();
+			for(int y = 0; y < boardSize[1]; y++) {
+				for(int x = 0; x < boardSize[0]; x++) {
+					for(int i = 0; i < chars.length; i++) {
+						if(chars[i] == board[x][y]) {
+							positions.add(new int[]{x,y});
+							break;
+						}
+					}
+				}
+			}
+		return positions;
+	}
+	
+	public static boolean isMoverAtPosition(int[] pos) {
+		for( int [] mover : horizMovers) {
+			if (pos[0] == mover[0] && pos[1] == mover[1]) {
+				return true;
+			}
+		}
+		for( int [] mover : vertMovers) {
+			if (pos[0] == mover[0] && pos[1] == mover[1]) {
+				return true;
+			}
+		}
+		return false;
+	}
 	//sets the player's position
-		public static void setPlayerPos(int x, int y) {
+	public static void setPlayerPos(int x, int y) {
 			playerPos[0] = x;
 			playerPos[1] = y;
-		}
+	}
+	
 	//initializes fields
 	public static void initialize(String boardPath, String movesPath) {
 		
@@ -236,7 +293,7 @@ public class SU24129429 {
 				}
 			}
 			scBoard.close();
-			printFullBoard();
+			//printFullBoard();
 		} catch (FileNotFoundException e) {
 			System.err.println("board file not found");
 			System.exit(1);
@@ -259,7 +316,7 @@ public class SU24129429 {
 		
 	}
 	
-	//prints the board array 
+	//prints the board array (for debug)
 	public static void printFullBoard() {
 		System.out.println("Board:");
 		for(int y = 0; y < boardSize[1]; y++) {
@@ -270,16 +327,8 @@ public class SU24129429 {
 		}
 	}
 	
-	//prints the
-	public static void printMoversBoard() {
-		System.out.println("Movers Board:");
-		for(int y = 0; y < boardSize[1]; y++) {
-			for(int x = 0; x < boardSize[0]; x++) {
-				System.out.print(board[x][y]);
-			}
-			System.out.print("\n");
-		}
-	}
+	
+	
 	
 
 }

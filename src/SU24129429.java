@@ -18,24 +18,31 @@ public class SU24129429 {
 
 	public static void main(String[] args) {
 		
-		System.out.println(args[0]);
-		System.out.println(args[1]);
-		initialize(args[0], args[1]);
+		//System.out.println(args[0]);
+		//System.out.println(args[1]);
+		String iboard = "board_10.txt";
+		String imoves = "moves_10.txt";
+		
+		//initialize(args[0],args[1]);
+		initialize(iboard, imoves);
 		//PUT CODE TO TEST METHODS HERE
 		
 		//END OF METHOD TESTING CODE
 		
 		//game logic
+		printBoard();
 		for (int m = 0; m < moves.length(); m++) {
 			if(!move(moves.charAt(m))) {
 				if(("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
 					System.out.println("player won (mover on target)");
-					//print board
+					printBoard();
 				}
 				System.out.println("You've Lost");
-				//print board
+				printBoard();
 				break;
 			}
+			System.out.println("\n\n" + moves.charAt(m));
+			printBoard();
 		}
 	}
 	
@@ -65,10 +72,13 @@ public class SU24129429 {
 				horizontal = true;
 				x = 1;
 				break;
+			case 'x':
+				printBoard();
+				return true;
 			default:
-				System.out.println("Incorrect move");
-				//print board
-				return false;
+				System.out.println("Incorrect Move");
+				printBoard();
+				System.exit(0);
 		}
 		
 		//set player position
@@ -101,7 +111,7 @@ public class SU24129429 {
 			case "t":
 			case "T":
 				System.out.println("You've won");
-				//print board
+				printBoard();
 				return true;
 			default:
 				return false;
@@ -250,15 +260,21 @@ public class SU24129429 {
 			String bPos = scBoard.nextLine();
 			
 			//initialize board size
-			boardSize[0] = Integer.parseInt(bPos.substring(0, bPos.indexOf(' ')));
-			boardSize[1] = Integer.parseInt(bPos.substring(bPos.indexOf(' ') + 1, bPos.length()));
+			boardSize[1] = Integer.parseInt(bPos.substring(0, bPos.indexOf(' ')));
+			boardSize[0] = Integer.parseInt(bPos.substring(bPos.indexOf(' ') + 1, bPos.length()));
 			
 			//initialize board and movers arrays
 			board = new Character[boardSize[0]][boardSize[1]];
 			
+			//System.out.println(boardSize[0]);
+			//System.out.println(boardSize[1]);
+			
+			
 			//populates board and movers arrays with values
 			for(int y = 0; y < boardSize[1]; y++) {
+				//System.out.println(y);
 				String row = scBoard.nextLine();
+				//System.out.println(row);
 				for(int x = 0; x < boardSize[0]; x++) {
 					Character temp = row.charAt(x);
 					
@@ -316,19 +332,56 @@ public class SU24129429 {
 		
 	}
 	
-	//prints the board array (for debug)
-	public static void printFullBoard() {
+	//prints the board array (for debugging)
+	public static void printBoardDebug() {
 		System.out.println("Board:");
 		for(int y = 0; y < boardSize[1]; y++) {
 			for(int x = 0; x < boardSize[0]; x++) {
-				System.out.print(board[x][y]);
+				if(!isMoverAtPosition(new int[] {x,y})) {
+					System.out.print(board[x][y]);
+				}else {
+					System.out.print("m");
+				}
 			}
 			System.out.print("\n");
 		}
 	}
 	
-	
-	
-	
+	public static void printBoard() {
+		for(int y = 0; y < boardSize[1]; y++) {
+			for(int x = 0; x < boardSize[0]; x++) {
+				if(playerPos[0] == x && playerPos[1] == y){
+					System.out.print("Y");
+				}else if(!isMoverAtPosition(new int[] {x,y})) {
+					switch("" + board[x][y]){
+					case "k":
+					case "K":
+						System.out.print("k");
+						break;
+					case "h":
+					case "v":
+						System.out.print("s");
+						break;
+					case "H":
+					case "V":
+						System.out.print("S");
+						break;
+					case "I": //inactive key
+						System.out.print(".");
+						break;
+					case "t":
+					case "T":
+						System.out.print("t");
+						break;
+					default:
+						System.out.print("" + board[x][y]);
+					}
+				}else {
+					System.out.print("m");
+				}
+			}
+			System.out.print("\n");
+		}
+	}
 
 }

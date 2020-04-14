@@ -20,29 +20,23 @@ public class SU24129429 {
 		
 		//System.out.println(args[0]);
 		//System.out.println(args[1]);
-		String iboard = "board_10.txt";
-		String imoves = "moves_10.txt";
+		//String iboard = "board_07.txt";
+		//String imoves = "moves_07.txt";
 		
-		//initialize(args[0],args[1]);
-		initialize(iboard, imoves);
-		//PUT CODE TO TEST METHODS HERE
-		
-		//END OF METHOD TESTING CODE
+		initialize(args[0],args[1]);
+		//initialize(iboard, imoves);
 		
 		//game logic
-		printBoard();
 		for (int m = 0; m < moves.length(); m++) {
 			if(!move(moves.charAt(m))) {
 				if(("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
-					System.out.println("player won (mover on target)");
+					System.out.println("You won!");
 					printBoard();
 				}
-				System.out.println("You've Lost");
+				System.out.println("You Lost!");
 				printBoard();
 				break;
 			}
-			System.out.println("\n\n" + moves.charAt(m));
-			printBoard();
 		}
 	}
 	
@@ -110,8 +104,7 @@ public class SU24129429 {
 				return true;
 			case "t":
 			case "T":
-				System.out.println("You've won");
-				printBoard();
+				System.out.println("You won!");
 				return true;
 			default:
 				return false;
@@ -135,13 +128,13 @@ public class SU24129429 {
 							mover[0] -= boardSize[0];
 						}
 						break;
-					case 3:
+					case 2:
 						mover[1] = (mover[1]-1);
 						if(mover[1]<0) {
 							mover[1] += boardSize[1];
 						}
 						break;
-					case 4:
+					case 3:
 						mover[1] = (mover[1]+1);
 						if(mover[1]>= boardSize[1]) {
 							mover[1] -= boardSize[1];
@@ -164,13 +157,13 @@ public class SU24129429 {
 							mover[0] -= boardSize[0];
 						}
 						break;
-					case 3:
+					case 2:
 						mover[1] = (mover[1]-1);
 						if(mover[1]<0) {
 							mover[1] += boardSize[1];
 						}
 						break;
-					case 4:
+					case 3:
 						mover[1] = (mover[1]+1);
 						if(mover[1]>= boardSize[1]) {
 							mover[1] -= boardSize[1];

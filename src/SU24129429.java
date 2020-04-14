@@ -115,7 +115,7 @@ public class SU24129429 {
 	}
 
 	public static boolean isValidInput(Character input) {
-		if (("lrudx").contains("" + input)) {
+		if (("hjklx").contains("" + input)) {
 			return true;
 		}
 		return false;

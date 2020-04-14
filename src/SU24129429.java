@@ -354,6 +354,7 @@ public class SU24129429 {
 					switch ("" + board[x][y]) {
 					case "k":
 					case "K":
+					case "I": // inactive key
 						System.out.print("k");
 						break;
 					case "h":
@@ -363,9 +364,6 @@ public class SU24129429 {
 					case "H":
 					case "V":
 						System.out.print("S");
-						break;
-					case "I": // inactive key
-						System.out.print(".");
 						break;
 					case "t":
 					case "T":

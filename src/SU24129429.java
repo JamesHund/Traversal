@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -15,40 +16,144 @@ public class SU24129429 {
 	public static ArrayList<int[]> vSwitches; // contains positions of vertical switches
 	public static int[] playerPos = new int[2];
 	public static String moves;
+	public static boolean graphics;
+	public static final int tileSize = 108;
 
 	public static void main(String[] args) {
 
-		// String iboard = "board_07.txt";
-		// String imoves = "moves_07.txt";
+		graphics = (args.length == 1);
 
-		initialize(args[0], args[1]);
-		// initialize(iboard, imoves);
-
-		// game logic
-		for (int m = 0; m < moves.length(); m++) {
-			Character input = moves.charAt(m);
-			if (isValidInput(input)) {
-				boolean isLegal = move(input);
-				if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
-					System.out.println("You won!");
+		if (graphics) { //graphics mode		
+			initialize(args[0]);
+			StdDraw.setCanvasSize(boardSize[0]*tileSize,boardSize[1]*tileSize);
+			StdDraw.clear(Color.LIGHT_GRAY);
+			while(true) {
+				while (!StdDraw.hasNextKeyTyped()) {
+				}
+				char input = StdDraw.nextKeyTyped();;
+				if (isValidInput(input)) {
+					if(input == 'q') {
+						System.exit(0);
+					}
+					boolean isLegal = move(input);
+					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
+						System.out.println("You won!");
+						break;
+					}
+					if (!isLegal) {
+						System.out.println("You lost!");
+						break;
+					}
+				}
+			}
+		} else { //text mode
+			initialize(args[0], args[1]);
+			for (int m = 0; m < moves.length(); m++) {
+				Character input = moves.charAt(m);
+				if (isValidInput(input)) {
+					boolean isLegal = move(input);
+					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
+						System.out.println("You won!");
+						printBoard();
+						break;
+					}
+					if (!isLegal) {
+						System.out.println("You lost!");
+						printBoard();
+						break;
+					}
+				} else {
+					System.out.println("Incorrect move");
 					printBoard();
 					break;
 				}
-				if (!isLegal) {
-					System.out.println("You lost!");
-					printBoard();
-					break;
-				}
-			} else {
-				System.out.println("Incorrect move");
-				printBoard();
-				break;
 			}
 		}
+		
+	}
+
+	// initializes fields (text mode)
+	public static void initialize(String boardPath, String movesPath) {
+		initialize(boardPath);
+		// initializes moves field
+		File movesFile = new File(movesPath);
+		Scanner scMoves;
+		try {
+			scMoves = new Scanner(movesFile);
+			moves = scMoves.nextLine();
+			scMoves.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("Moves file not found");
+		}
+
+		hSwitches = searchBoard(new Character[] { 'h', 'H' });
+		vSwitches = searchBoard(new Character[] { 'v', 'V' });
+		ports = searchBoard(new Character[] { 'p', 'P' });
+	}
+
+	// initializes fields (graphics mode)
+	public static void initialize(String boardPath) {
+
+		// initialize boards
+		File boardFile = new File(boardPath);
+		try {
+			// file read in
+			Scanner scBoard = new Scanner(boardFile);
+			scBoard.nextLine();
+			String bPos = scBoard.nextLine();
+
+			// initialize board size
+			boardSize[1] = Integer.parseInt(bPos.substring(0, bPos.indexOf(' ')));
+			boardSize[0] = Integer.parseInt(bPos.substring(bPos.indexOf(' ') + 1, bPos.length()));
+
+			// initialize board array to specified size
+			board = new Character[boardSize[0]][boardSize[1]];
+
+			// populates board and movers arrays with values
+			for (int y = 0; y < boardSize[1]; y++) {
+				String row = scBoard.nextLine();
+				for (int x = 0; x < boardSize[0]; x++) {
+					Character temp = row.charAt(x);
+					// position is starting position
+					if (temp == 's' || temp == 'S') {
+						setPlayerPos(x, y);
+						temp = '.';
+					} else if (("lrudLRUD").contains("" + temp)) { // checks if mover is in position
+						int id = -1;
+						switch (("" + temp).toLowerCase()) {
+						case "l":
+							id = 0;
+							break;
+						case "r":
+							id = 1;
+							break;
+						case "u":
+							id = 2;
+							break;
+						case "d":
+							id = 3;
+							break;
+						}
+						if (Character.isLowerCase(temp)) {
+							horizMovers.add(new int[] { x, y, id });
+						} else {
+							vertMovers.add(new int[] { x, y, id });
+						}
+						temp = '.';
+					}
+					board[x][y] = temp;
+				}
+			}
+			scBoard.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("Board file not found");
+			System.exit(1);
+		}
+
 	}
 
 	// moves the player, returns false if illegal move
-	public static boolean move(Character move) {
+	public static boolean move(char move) {
 		int x = 0; // x offset
 		int y = 0; // y offset
 		boolean horizontal = false;
@@ -114,8 +219,14 @@ public class SU24129429 {
 
 	}
 
-	public static boolean isValidInput(Character input) {
-		if (("hjklx").contains("" + input)) {
+	public static boolean isValidInput(char input) {
+		String validchars;
+		if (graphics) {
+			validchars = "hjklq";
+		}else {
+			validchars = "hjklx";
+		}
+		if (validchars.contains("" + input)) {
 			return true;
 		}
 		return false;
@@ -255,80 +366,6 @@ public class SU24129429 {
 	}
 
 	// initializes fields
-	public static void initialize(String boardPath, String movesPath) {
-
-		// initialize boards
-		File boardFile = new File(boardPath);
-		try {
-			// file read in
-			Scanner scBoard = new Scanner(boardFile);
-			scBoard.nextLine();
-			String bPos = scBoard.nextLine();
-
-			// initialize board size
-			boardSize[1] = Integer.parseInt(bPos.substring(0, bPos.indexOf(' ')));
-			boardSize[0] = Integer.parseInt(bPos.substring(bPos.indexOf(' ') + 1, bPos.length()));
-
-			// initialize board array to specified size
-			board = new Character[boardSize[0]][boardSize[1]];
-
-			// populates board and movers arrays with values
-			for (int y = 0; y < boardSize[1]; y++) {
-				String row = scBoard.nextLine();
-				for (int x = 0; x < boardSize[0]; x++) {
-					Character temp = row.charAt(x);
-					// position is starting position
-					if (temp == 's' || temp == 'S') {
-						setPlayerPos(x, y);
-						temp = '.';
-					} else if (("lrudLRUD").contains("" + temp)) { // checks if mover is in position
-						int id = -1;
-						switch (("" + temp).toLowerCase()) {
-						case "l":
-							id = 0;
-							break;
-						case "r":
-							id = 1;
-							break;
-						case "u":
-							id = 2;
-							break;
-						case "d":
-							id = 3;
-							break;
-						}
-						if (Character.isLowerCase(temp)) {
-							horizMovers.add(new int[] { x, y, id });
-						} else {
-							vertMovers.add(new int[] { x, y, id });
-						}
-						temp = '.';
-					}
-					board[x][y] = temp;
-				}
-			}
-			scBoard.close();
-		} catch (FileNotFoundException e) {
-			System.err.println("Board file not found");
-			System.exit(1);
-		}
-
-		// initializes moves field
-		File movesFile = new File(movesPath);
-		Scanner scMoves;
-		try {
-			scMoves = new Scanner(movesFile);
-			moves = scMoves.nextLine();
-			scMoves.close();
-		} catch (FileNotFoundException e) {
-			System.err.println("Moves file not found");
-		}
-
-		hSwitches = searchBoard(new Character[] { 'h', 'H' });
-		vSwitches = searchBoard(new Character[] { 'v', 'V' });
-		ports = searchBoard(new Character[] { 'p', 'P' });
-
-	}
 
 	// prints the board array (for debugging)
 	public static void printBoardDebug() {

@@ -103,7 +103,8 @@ public class SU24129429 {
 			case "t":
 			case "T":
 				System.out.println("You won!");
-				return true;
+				printBoard();
+				System.exit(0);
 			default:
 				return false;
 		}
@@ -356,6 +357,9 @@ public class SU24129429 {
 					case "t":
 					case "T":
 						System.out.print("t");
+						break;
+                    case "X":
+						System.out.print("x");
 						break;
 					default:
 						System.out.print("" + board[x][y]);

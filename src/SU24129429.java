@@ -11,15 +11,13 @@ public class SU24129429 {
 	public static ArrayList<int[]> horizMovers = new ArrayList<>(); //contains positions and types of movers
 	public static ArrayList<int[]> vertMovers = new ArrayList<>(); 
 	public static ArrayList<int[]> ports; //contains positions of ports
-	public static ArrayList<int[]> hSwitches; //contains positions of horiz switches
+	public static ArrayList<int[]> hSwitches; //contains positions of horizontal switches
 	public static ArrayList<int[]> vSwitches; //contains positions of vertical switches
 	public static int[] playerPos = new int[2];
 	public static String moves;
 
 	public static void main(String[] args) {
 		
-		//System.out.println(args[0]);
-		//System.out.println(args[1]);
 		//String iboard = "board_07.txt";
 		//String imoves = "moves_07.txt";
 		
@@ -112,6 +110,7 @@ public class SU24129429 {
 		
 	}
 	
+	//iterates through either horizontal or vertical movers lists and moves them accordingly
 	public static void moveMovers(boolean isHorizontal) {
 		if(isHorizontal) {
 			for(int[] mover : horizMovers) {
@@ -256,26 +255,19 @@ public class SU24129429 {
 			boardSize[1] = Integer.parseInt(bPos.substring(0, bPos.indexOf(' ')));
 			boardSize[0] = Integer.parseInt(bPos.substring(bPos.indexOf(' ') + 1, bPos.length()));
 			
-			//initialize board and movers arrays
+			//initialize board array to specified size
 			board = new Character[boardSize[0]][boardSize[1]];
-			
-			//System.out.println(boardSize[0]);
-			//System.out.println(boardSize[1]);
-			
 			
 			//populates board and movers arrays with values
 			for(int y = 0; y < boardSize[1]; y++) {
-				//System.out.println(y);
 				String row = scBoard.nextLine();
-				//System.out.println(row);
 				for(int x = 0; x < boardSize[0]; x++) {
 					Character temp = row.charAt(x);
-					
 					//position is starting position
 					if (temp == 's' || temp == 'S') {
 						setPlayerPos(x,y);
 						temp = '.';
-					}else if(("lrudLRUD").contains("" + temp)){
+					}else if(("lrudLRUD").contains("" + temp)){ //checks if mover is in position
 						int id = -1;
 						switch((""+temp).toLowerCase()) {
 							case "l":
@@ -302,9 +294,8 @@ public class SU24129429 {
 				}
 			}
 			scBoard.close();
-			//printFullBoard();
 		} catch (FileNotFoundException e) {
-			System.err.println("board file not found");
+			System.err.println("Board file not found");
 			System.exit(1);
 		}
 		

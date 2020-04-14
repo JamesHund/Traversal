@@ -18,24 +18,35 @@ public class SU24129429 {
 	public static String moves;
 	public static boolean graphics;
 	public static final int tileSize = 108;
+	public static final int offset = tileSize / 2;
 
 	public static void main(String[] args) {
 
 		graphics = (args.length == 1);
 
-		if (graphics) { //graphics mode		
+		if (graphics) { // graphics mode
 			initialize(args[0]);
-			StdDraw.setCanvasSize(boardSize[0]*tileSize,boardSize[1]*tileSize);
+			StdDraw.setCanvasSize(boardSize[0] * tileSize, boardSize[1] * tileSize);
 			StdDraw.clear(Color.LIGHT_GRAY);
-			while(true) {
+			StdDraw.setXscale(0, boardSize[0] * tileSize);
+			StdDraw.setYscale(0, boardSize[1] * tileSize);
+			for (int x = 0; x < boardSize[0]; x++) {
+				for (int y = 0; y < boardSize[1]; y++) {
+					drawPosition(new int[] { x, y });
+				}
+			}
+			while (true) {
 				while (!StdDraw.hasNextKeyTyped()) {
 				}
-				char input = StdDraw.nextKeyTyped();;
+				char input = StdDraw.nextKeyTyped();
 				if (isValidInput(input)) {
-					if(input == 'q') {
+					if (input == 'q') {
 						System.exit(0);
 					}
+					int[] oldPlayerPos = new int[] {playerPos[0],playerPos[1]};
 					boolean isLegal = move(input);
+					drawPosition(oldPlayerPos);
+					drawPosition(playerPos);
 					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
 						System.out.println("You won!");
 						break;
@@ -46,7 +57,7 @@ public class SU24129429 {
 					}
 				}
 			}
-		} else { //text mode
+		} else { // text mode
 			initialize(args[0], args[1]);
 			for (int m = 0; m < moves.length(); m++) {
 				Character input = moves.charAt(m);
@@ -69,7 +80,7 @@ public class SU24129429 {
 				}
 			}
 		}
-		
+
 	}
 
 	// initializes fields (text mode)
@@ -223,7 +234,7 @@ public class SU24129429 {
 		String validchars;
 		if (graphics) {
 			validchars = "hjklq";
-		}else {
+		} else {
 			validchars = "hjklx";
 		}
 		if (validchars.contains("" + input)) {
@@ -298,20 +309,23 @@ public class SU24129429 {
 
 	public static void switchSwitches(boolean isHorizontal) {
 		if (isHorizontal) {
-			for (int[] pos : hSwitches) {
-				if (board[pos[0]][pos[1]] == 'h') {
-					board[pos[0]][pos[1]] = 'H';
-				} else {
-					board[pos[0]][pos[1]] = 'h';
+			if (hSwitches != null) {
+				for (int[] pos : hSwitches) {
+					if (board[pos[0]][pos[1]] == 'h') {
+						board[pos[0]][pos[1]] = 'H';
+					} else {
+						board[pos[0]][pos[1]] = 'h';
+					}
 				}
 			}
-
 		} else {
-			for (int[] pos : vSwitches) {
-				if (board[pos[0]][pos[1]] == 'v') {
-					board[pos[0]][pos[1]] = 'V';
-				} else {
-					board[pos[0]][pos[1]] = 'v';
+			if (vSwitches != null) {
+				for (int[] pos : vSwitches) {
+					if (board[pos[0]][pos[1]] == 'v') {
+						board[pos[0]][pos[1]] = 'V';
+					} else {
+						board[pos[0]][pos[1]] = 'v';
+					}
 				}
 			}
 		}
@@ -345,6 +359,7 @@ public class SU24129429 {
 		return positions;
 	}
 
+	// returns true if a mover is at a certain position
 	public static boolean isMoverAtPosition(int[] pos) {
 		for (int[] mover : horizMovers) {
 			if (pos[0] == mover[0] && pos[1] == mover[1]) {
@@ -365,7 +380,63 @@ public class SU24129429 {
 		playerPos[1] = y;
 	}
 
-	// initializes fields
+	// takes in position and updates GUI at tile position pos
+	public static void drawPosition(int[] pos) {
+		String tile = "" + board[pos[0]][pos[1]];
+		String image = "images/tvl_";
+		if (pos[0] == playerPos[0] && pos[1] == playerPos[1]) {
+			image += "s";
+		} else if (!isMoverAtPosition(pos)) {
+			switch (tile) {
+			case "k":
+			case "K":
+				image += "k1";
+				break;
+			case "I": // inactive key
+				image += "k0";
+				break;
+			case "h":
+				image += "sh0";
+				break;
+			case "v":
+				image += "sv0";
+				break;
+			case "H":
+				image += "sh1";
+				break;
+			case "V":
+				image += "sv1";
+				break;
+			case "t":
+			case "T":
+				image += "t";
+				break;
+			case "x":
+			case "X":
+				image += "x";
+				break;
+			case "p":
+				image += "p0";
+				break;
+			case "P":
+				image += "p1";
+				break;
+			default:
+				StdDraw.setPenColor(Color.LIGHT_GRAY);
+				StdDraw.filledSquare( tileSize * pos[0] + offset, boardSize[1] * tileSize - tileSize * pos[1] - offset, offset);
+				return;
+			}
+		} else {
+			// mover
+		}
+		
+		image += ".png";
+		System.out.println(image);
+		int xCoord = tileSize * pos[0] + offset;
+		int yCoord = boardSize[1] * tileSize - tileSize * pos[1] - offset;
+
+		StdDraw.picture(xCoord, yCoord, image);
+	}
 
 	// prints the board array (for debugging)
 	public static void printBoardDebug() {

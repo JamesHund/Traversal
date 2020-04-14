@@ -31,7 +31,7 @@ public class SU24129429 {
 					System.out.println("You won!");
 					printBoard();
 				}
-				System.out.println("You Lost!");
+				System.out.println("You lost!");
 				printBoard();
 				break;
 			}
@@ -68,7 +68,7 @@ public class SU24129429 {
 				printBoard();
 				return true;
 			default:
-				System.out.println("Incorrect Move");
+				System.out.println("Incorrect move");
 				printBoard();
 				System.exit(0);
 		}

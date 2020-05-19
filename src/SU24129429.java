@@ -9,15 +9,18 @@ public class SU24129429 {
 	// declaring variables
 	public static int[] boardSize = new int[2];
 	public static Character[][] board;
+
 	public static ArrayList<int[]> horizMovers = new ArrayList<>(); // contains positions and types of movers
 	public static ArrayList<int[]> vertMovers = new ArrayList<>();
 	public static ArrayList<int[]> ports; // contains positions of ports
 	public static ArrayList<int[]> hSwitches; // contains positions of horizontal switches
 	public static ArrayList<int[]> vSwitches; // contains positions of vertical switches
+
 	public static int[] playerPos = new int[2];
 	public static String moves;
-	public static boolean graphics;
-	public static final int tileSize = 108;
+
+	public static boolean graphics; // true if graphics mode enabled
+	public static final int tileSize = 108; // size (in pixels) to render each tile
 	public static final int offset = tileSize / 2;
 
 	public static void main(String[] args) {
@@ -25,45 +28,58 @@ public class SU24129429 {
 		graphics = (args.length == 1);
 
 		if (graphics) { // graphics mode
+
 			initialize(args[0]);
-			StdDraw.setCanvasSize(boardSize[0] * tileSize, boardSize[1] * tileSize);
-			StdDraw.clear(Color.LIGHT_GRAY);
-			StdDraw.setXscale(0, boardSize[0] * tileSize);
-			StdDraw.setYscale(0, boardSize[1] * tileSize);
-			for (int x = 0; x < boardSize[0]; x++) {
-				for (int y = 0; y < boardSize[1]; y++) {
-					drawPosition(new int[] { x, y });
-				}
-			}
+
+			initializeCanvas();
+
+			// main game loop
 			while (true) {
-				while (!StdDraw.hasNextKeyTyped()) {
-				}
+				// wait for input
+				while (!StdDraw.hasNextKeyTyped()); 
 				char input = StdDraw.nextKeyTyped();
+
 				if (isValidInput(input)) {
-					if (input == 'q') {
+
+					// quit command
+					if (input == 'q')
 						System.exit(0);
-					}
-					int[] oldPlayerPos = new int[] {playerPos[0],playerPos[1]};
+
+					int[] oldPlayerPos = new int[] { playerPos[0], playerPos[1] };
 					boolean isLegal = move(input);
+
 					drawPosition(oldPlayerPos);
 					drawPosition(playerPos);
-					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
+
+					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) { // checks if player on target
 						System.out.println("You won!");
-						break;
+						System.exit(0);
 					}
 					if (!isLegal) {
 						System.out.println("You lost!");
-						break;
+						System.exit(0);
 					}
 				}
 			}
 		} else { // text mode
+
 			initialize(args[0], args[1]);
+
+			//main game loop
 			for (int m = 0; m < moves.length(); m++) {
+
 				Character input = moves.charAt(m);
+
 				if (isValidInput(input)) {
+					
+					if (input == 'x') { //quit command
+						printBoard();
+						break;
+					}
+
 					boolean isLegal = move(input);
-					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) {
+
+					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) { // checks if player on target
 						System.out.println("You won!");
 						printBoard();
 						break;
@@ -85,6 +101,7 @@ public class SU24129429 {
 
 	// initializes fields (text mode)
 	public static void initialize(String boardPath, String movesPath) {
+
 		initialize(boardPath);
 		// initializes moves field
 		File movesFile = new File(movesPath);
@@ -97,9 +114,6 @@ public class SU24129429 {
 			System.err.println("Moves file not found");
 		}
 
-		hSwitches = searchBoard(new Character[] { 'h', 'H' });
-		vSwitches = searchBoard(new Character[] { 'v', 'V' });
-		ports = searchBoard(new Character[] { 'p', 'P' });
 	}
 
 	// initializes fields (graphics mode)
@@ -161,13 +175,37 @@ public class SU24129429 {
 			System.exit(1);
 		}
 
+		hSwitches = searchBoard(new Character[] { 'h', 'H' });
+		vSwitches = searchBoard(new Character[] { 'v', 'V' });
+		ports = searchBoard(new Character[] { 'p', 'P' });
+
 	}
 
-	// moves the player, returns false if illegal move
+	// creates a game window and draws initial layout
+	public static void initializeCanvas() {
+		StdDraw.setCanvasSize(boardSize[0] * tileSize, boardSize[1] * tileSize);
+		StdDraw.clear(Color.LIGHT_GRAY);
+		StdDraw.setXscale(0, boardSize[0] * tileSize);
+		StdDraw.setYscale(0, boardSize[1] * tileSize);
+
+		// draw initial layout of tiles on canvas
+		for (int x = 0; x < boardSize[0]; x++) {
+			for (int y = 0; y < boardSize[1]; y++) {
+				drawPosition(new int[] { x, y });
+			}
+		}
+	}
+
+	// moves the player, returns false the move is illegal
+	// does not validate input (this is performed in validateInput() method)
 	public static boolean move(char move) {
-		int x = 0; // x offset
-		int y = 0; // y offset
-		boolean horizontal = false;
+
+		// positional offsets by which to move the player
+		int x = 0; 
+		int y = 0; 
+
+		boolean horizontal = false; // whether the player moves horizontally
+
 		switch (move) {
 		// UP
 		case 'k':
@@ -189,21 +227,21 @@ public class SU24129429 {
 			horizontal = true;
 			x = 1;
 			break;
-		case 'x':
-			printBoard();
-			return true;
 		}
 
-		// set player position
+		// sets the player position
 		if (playerPos[0] + x < 0 || playerPos[0] + x == boardSize[0]) {
+			// if the player tries to move off the sides of the board the method returns,
+			// hence no changes are made to board
 			return true;
-		} else if (playerPos[1] + y < 0) {
+		} else if (playerPos[1] + y < 0) { // wraps player round bottom
 			setPlayerPos(playerPos[0], boardSize[1] - 1);
-		} else if (playerPos[1] + y == boardSize[1]) {
+		} else if (playerPos[1] + y == boardSize[1]) { // wraps player round top
 			setPlayerPos(playerPos[0], 0);
 		} else {
 			setPlayerPos(playerPos[0] + x, playerPos[1] + y);
 		}
+
 		moveMovers(horizontal);
 		switchSwitches(horizontal);
 
@@ -212,6 +250,8 @@ public class SU24129429 {
 
 		if (isMoverAtPosition(playerPos))
 			return false;
+
+		// determines whether player steps on a dangerous tile
 		switch ("" + board[pX][pY]) {
 		case "k":
 		case "K":
@@ -230,6 +270,7 @@ public class SU24129429 {
 
 	}
 
+	// Validates user input based on whether program is run in text or graphics mode
 	public static boolean isValidInput(char input) {
 		String validchars;
 		if (graphics) {
@@ -248,61 +289,87 @@ public class SU24129429 {
 	public static void moveMovers(boolean isHorizontal) {
 		if (isHorizontal) {
 			for (int[] mover : horizMovers) {
+				int[] oldPos = new int[] { mover[0], mover[1] };
+				int xOffset = 0;
+				int yOffset = 0;
+
 				switch (mover[2]) {
 				case 0:
-					mover[0] = (mover[0] - 1);
-					if (mover[0] < 0) {
-						mover[0] += boardSize[0];
+					xOffset -= 1;
+					if (mover[0] + xOffset < 0) {
+						xOffset += boardSize[0];
 					}
 					break;
 				case 1:
-					mover[0] = (mover[0] + 1);
-					if (mover[0] >= boardSize[0]) {
-						mover[0] -= boardSize[0];
+					xOffset += 1;
+					if (mover[0] + xOffset >= boardSize[0]) {
+						xOffset -= boardSize[0];
 					}
 					break;
 				case 2:
-					mover[1] = (mover[1] - 1);
-					if (mover[1] < 0) {
-						mover[1] += boardSize[1];
+					yOffset -= 1;
+					if (mover[1] + yOffset < 0) {
+						yOffset += boardSize[1];
 					}
 					break;
 				case 3:
-					mover[1] = (mover[1] + 1);
-					if (mover[1] >= boardSize[1]) {
-						mover[1] -= boardSize[1];
+					yOffset += 1;
+					if (mover[1] + yOffset >= boardSize[1]) {
+						yOffset -= boardSize[1];
 					}
 					break;
+				}
+
+				mover[0] += xOffset;
+				mover[1] += yOffset;
+				if (graphics) {
+					drawPosition(new int[] { mover[0], mover[1] });
+					drawPosition(oldPos);
 				}
 			}
 		} else {
 			for (int[] mover : vertMovers) {
+
+				int xOffset = 0;
+				int yOffset = 0;
+				int[] oldPos = new int[] { mover[0], mover[1] };
+
 				switch (mover[2]) {
 				case 0:
-					mover[0] = (mover[0] - 1);
-					if (mover[0] < 0) {
-						mover[0] += boardSize[0];
+					xOffset -= 1;
+					if (mover[0] + xOffset < 0) {
+						xOffset += boardSize[0];
 					}
 					break;
 				case 1:
-					mover[0] = (mover[0] + 1);
-					if (mover[0] >= boardSize[0]) {
-						mover[0] -= boardSize[0];
+					xOffset += 1;
+					if (mover[0] + xOffset >= boardSize[0]) {
+						xOffset -= boardSize[0];
 					}
 					break;
 				case 2:
-					mover[1] = (mover[1] - 1);
-					if (mover[1] < 0) {
-						mover[1] += boardSize[1];
+					yOffset -= 1;
+					;
+					if (mover[1] + yOffset < 0) {
+						yOffset += boardSize[1];
 					}
 					break;
 				case 3:
-					mover[1] = (mover[1] + 1);
-					if (mover[1] >= boardSize[1]) {
-						mover[1] -= boardSize[1];
+					yOffset += 1;
+					if (mover[1] + yOffset >= boardSize[1]) {
+						yOffset -= boardSize[1];
 					}
 					break;
 				}
+
+				mover[0] += xOffset;
+				mover[1] += yOffset;
+
+				if (graphics) {
+					drawPosition(new int[] { mover[0], mover[1] });
+					drawPosition(oldPos);
+				}
+
 			}
 		}
 	}
@@ -316,6 +383,9 @@ public class SU24129429 {
 					} else {
 						board[pos[0]][pos[1]] = 'h';
 					}
+					if (graphics) {
+						drawPosition(pos);
+					}
 				}
 			}
 		} else {
@@ -325,6 +395,9 @@ public class SU24129429 {
 						board[pos[0]][pos[1]] = 'V';
 					} else {
 						board[pos[0]][pos[1]] = 'v';
+					}
+					if (graphics) {
+						drawPosition(pos);
 					}
 				}
 			}
@@ -338,6 +411,10 @@ public class SU24129429 {
 				board[port[0]][port[1]] = 'P';
 			} else {
 				board[port[0]][port[1]] = 'p';
+			}
+
+			if (graphics) {
+				drawPosition(port);
 			}
 		}
 	}
@@ -374,6 +451,23 @@ public class SU24129429 {
 		return false;
 	}
 
+	// returns type of mover at position as an int array
+	// {direction,horizontal/vertical}
+	public static int[] moverTypeAtPosition(int[] pos) {
+		for (int[] mover : horizMovers) {
+			if (pos[0] == mover[0] && pos[1] == mover[1]) {
+				return new int[] { mover[2], 0 };
+			}
+		}
+		for (int[] mover : vertMovers) {
+			if (pos[0] == mover[0] && pos[1] == mover[1]) {
+				return new int[] { mover[2], 1 };
+			}
+		}
+
+		return new int[] { -1, -1 }; // returns -1,-1 in the case where mover is not found in position
+	}
+
 	// sets the player's position
 	public static void setPlayerPos(int x, int y) {
 		playerPos[0] = x;
@@ -396,16 +490,16 @@ public class SU24129429 {
 				image += "k0";
 				break;
 			case "h":
-				image += "sh0";
-				break;
-			case "v":
-				image += "sv0";
-				break;
-			case "H":
 				image += "sh1";
 				break;
-			case "V":
+			case "v":
 				image += "sv1";
+				break;
+			case "H":
+				image += "sh0";
+				break;
+			case "V":
+				image += "sv0";
 				break;
 			case "t":
 			case "T":
@@ -416,22 +510,38 @@ public class SU24129429 {
 				image += "x";
 				break;
 			case "p":
-				image += "p0";
+				image += "p1";
 				break;
 			case "P":
-				image += "p1";
+				image += "p0";
 				break;
 			default:
 				StdDraw.setPenColor(Color.LIGHT_GRAY);
-				StdDraw.filledSquare( tileSize * pos[0] + offset, boardSize[1] * tileSize - tileSize * pos[1] - offset, offset);
+				StdDraw.filledSquare(tileSize * pos[0] + offset, boardSize[1] * tileSize - tileSize * pos[1] - offset,
+						offset);
 				return;
 			}
 		} else {
-			// mover
+			int[] type = moverTypeAtPosition(pos);
+			switch (type[0]) {
+			case 0:
+				image += "l";
+				break;
+			case 1:
+				image += "r";
+				break;
+			case 2:
+				image += "u";
+				break;
+			case 3:
+				image += "d";
+				break;
+			}
+			image += (type[1] == 0) ? "h" : "v";
 		}
-		
+
 		image += ".png";
-		System.out.println(image);
+		// System.out.println(image);
 		int xCoord = tileSize * pos[0] + offset;
 		int yCoord = boardSize[1] * tileSize - tileSize * pos[1] - offset;
 

@@ -7,21 +7,26 @@ import java.util.Scanner;
 public class SU24129429 {
 
 	// declaring variables
-	public static int[] boardSize = new int[2];
+	public static int[] boardSize;
 	public static Character[][] board;
 
-	public static ArrayList<int[]> horizMovers = new ArrayList<>(); // contains positions and types of movers
-	public static ArrayList<int[]> vertMovers = new ArrayList<>();
+	public static ArrayList<int[]> horizMovers; // contains positions and types of movers
+	public static ArrayList<int[]> vertMovers;
 	public static ArrayList<int[]> ports; // contains positions of ports
 	public static ArrayList<int[]> hSwitches; // contains positions of horizontal switches
 	public static ArrayList<int[]> vSwitches; // contains positions of vertical switches
 
-	public static int[] playerPos = new int[2];
+	public static int[] playerPos;
 	public static String moves;
 
 	public static boolean graphics; // true if graphics mode enabled
 	public static final int tileSize = 108; // size (in pixels) to render each tile
-	public static final int offset = tileSize / 2;
+	public static final int tileOffset = tileSize / 2;
+	public static boolean hasLost = false;
+	
+	public SU24129429(String[] args) {
+		main(args);
+	}
 
 	public static void main(String[] args) {
 
@@ -57,7 +62,28 @@ public class SU24129429 {
 					}
 					if (!isLegal) {
 						System.out.println("You lost!");
-						System.exit(0);
+						hasLost = true;
+						int[] drawOffset = new int[] {0,0};
+						double timeStep = 1000.0/24.0; //framerate of animation
+						double totalTime = 4000; //total time of animation (milliseconds)
+						long initial = System.currentTimeMillis();
+						long previous = initial;
+						while(true) {
+							long current = System.currentTimeMillis();
+							if(current - initial < totalTime) {
+								if (current - previous > timeStep) {
+									previous = current;
+									drawOffset[0] += 4;
+									drawOffset[1] += 4;
+									StdDraw.setXscale(0 + drawOffset[0], boardSize[0] * tileSize + drawOffset[0]);
+									StdDraw.setYscale(0 + drawOffset[1], boardSize[1] * tileSize + drawOffset[1]);
+									drawFullBoard();
+								}
+							}else {
+								new SU24129429(args);
+								System.exit(0);
+							}
+						}
 					}
 				}
 			}
@@ -128,11 +154,17 @@ public class SU24129429 {
 			String bPos = scBoard.nextLine();
 
 			// initialize board size
+			boardSize = new int[2];
 			boardSize[1] = Integer.parseInt(bPos.substring(0, bPos.indexOf(' ')));
 			boardSize[0] = Integer.parseInt(bPos.substring(bPos.indexOf(' ') + 1, bPos.length()));
 
 			// initialize board array to specified size
 			board = new Character[boardSize[0]][boardSize[1]];
+			
+			horizMovers = new ArrayList<>();
+			vertMovers = new ArrayList<>();
+			playerPos = new int[2];
+			hasLost = false;
 
 			// populates board and movers arrays with values
 			for (int y = 0; y < boardSize[1]; y++) {
@@ -189,6 +221,12 @@ public class SU24129429 {
 		StdDraw.setYscale(0, boardSize[1] * tileSize);
 
 		// draw initial layout of tiles on canvas
+		drawFullBoard();
+		
+	}
+	
+	public static void drawFullBoard(){
+		//StdDraw.clear(Color.LIGHT_GRAY);
 		for (int x = 0; x < boardSize[0]; x++) {
 			for (int y = 0; y < boardSize[1]; y++) {
 				drawPosition(new int[] { x, y });
@@ -516,9 +554,11 @@ public class SU24129429 {
 				image += "p0";
 				break;
 			default:
-				StdDraw.setPenColor(Color.LIGHT_GRAY);
-				StdDraw.filledSquare(tileSize * pos[0] + offset, boardSize[1] * tileSize - tileSize * pos[1] - offset,
-						offset);
+				if(!hasLost) {
+					StdDraw.setPenColor(Color.LIGHT_GRAY);
+					StdDraw.filledSquare(tileSize * pos[0] + tileOffset, boardSize[1] * tileSize - tileSize * pos[1] - tileOffset,
+							tileOffset);
+				}
 				return;
 			}
 		} else {
@@ -542,8 +582,8 @@ public class SU24129429 {
 
 		image += ".png";
 		// System.out.println(image);
-		int xCoord = tileSize * pos[0] + offset;
-		int yCoord = boardSize[1] * tileSize - tileSize * pos[1] - offset;
+		int xCoord = tileSize * pos[0] + tileOffset;
+		int yCoord = boardSize[1] * tileSize - tileSize * pos[1] - tileOffset;
 
 		StdDraw.picture(xCoord, yCoord, image);
 	}

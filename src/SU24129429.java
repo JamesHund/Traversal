@@ -1,6 +1,9 @@
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontFormatException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -23,7 +26,7 @@ public class SU24129429 {
 	public static final int tileSize = 108; // size (in pixels) to render each tile
 	public static final int tileOffset = tileSize / 2;
 	public static boolean hasLost = false;
-	
+
 	public SU24129429(String[] args) {
 		main(args);
 	}
@@ -41,7 +44,8 @@ public class SU24129429 {
 			// main game loop
 			while (true) {
 				// wait for input
-				while (!StdDraw.hasNextKeyTyped()); 
+				while (!StdDraw.hasNextKeyTyped())
+					;
 				char input = StdDraw.nextKeyTyped();
 
 				if (isValidInput(input)) {
@@ -58,32 +62,14 @@ public class SU24129429 {
 
 					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) { // checks if player on target
 						System.out.println("You won!");
+						playWinningAnimation(500, 40);
 						System.exit(0);
 					}
 					if (!isLegal) {
 						System.out.println("You lost!");
-						hasLost = true;
-						int[] drawOffset = new int[] {0,0};
-						double timeStep = 1000.0/24.0; //framerate of animation
-						double totalTime = 4000; //total time of animation (milliseconds)
-						long initial = System.currentTimeMillis();
-						long previous = initial;
-						while(true) {
-							long current = System.currentTimeMillis();
-							if(current - initial < totalTime) {
-								if (current - previous > timeStep) {
-									previous = current;
-									drawOffset[0] += 4;
-									drawOffset[1] += 4;
-									StdDraw.setXscale(0 + drawOffset[0], boardSize[0] * tileSize + drawOffset[0]);
-									StdDraw.setYscale(0 + drawOffset[1], boardSize[1] * tileSize + drawOffset[1]);
-									drawFullBoard();
-								}
-							}else {
-								new SU24129429(args);
-								System.exit(0);
-							}
-						}
+						playLosingAnimation(3000.0, 30);
+						System.exit(0);
+
 					}
 				}
 			}
@@ -91,14 +77,14 @@ public class SU24129429 {
 
 			initialize(args[0], args[1]);
 
-			//main game loop
+			// main game loop
 			for (int m = 0; m < moves.length(); m++) {
 
 				Character input = moves.charAt(m);
 
 				if (isValidInput(input)) {
-					
-					if (input == 'x') { //quit command
+
+					if (input == 'x') { // quit command
 						printBoard();
 						break;
 					}
@@ -160,7 +146,7 @@ public class SU24129429 {
 
 			// initialize board array to specified size
 			board = new Character[boardSize[0]][boardSize[1]];
-			
+
 			horizMovers = new ArrayList<>();
 			vertMovers = new ArrayList<>();
 			playerPos = new int[2];
@@ -213,34 +199,13 @@ public class SU24129429 {
 
 	}
 
-	// creates a game window and draws initial layout
-	public static void initializeCanvas() {
-		StdDraw.setCanvasSize(boardSize[0] * tileSize, boardSize[1] * tileSize);
-		StdDraw.clear(Color.LIGHT_GRAY);
-		StdDraw.setXscale(0, boardSize[0] * tileSize);
-		StdDraw.setYscale(0, boardSize[1] * tileSize);
-
-		// draw initial layout of tiles on canvas
-		drawFullBoard();
-		
-	}
-	
-	public static void drawFullBoard(){
-		//StdDraw.clear(Color.LIGHT_GRAY);
-		for (int x = 0; x < boardSize[0]; x++) {
-			for (int y = 0; y < boardSize[1]; y++) {
-				drawPosition(new int[] { x, y });
-			}
-		}
-	}
-
 	// moves the player, returns false the move is illegal
 	// does not validate input (this is performed in validateInput() method)
 	public static boolean move(char move) {
 
 		// positional offsets by which to move the player
-		int x = 0; 
-		int y = 0; 
+		int x = 0;
+		int y = 0;
 
 		boolean horizontal = false; // whether the player moves horizontally
 
@@ -512,11 +477,36 @@ public class SU24129429 {
 		playerPos[1] = y;
 	}
 
+	// creates a game window and draws initial layout
+	public static void initializeCanvas() {
+
+		StdDraw.setCanvasSize(boardSize[0] * tileSize, boardSize[1] * tileSize);
+		StdDraw.clear(Color.LIGHT_GRAY);
+		StdDraw.setXscale(0, boardSize[0] * tileSize);
+		StdDraw.setYscale(0, boardSize[1] * tileSize);
+
+		// draw initial layout of tiles on canvas
+		drawFullBoard();
+
+	}
+
+	public static void drawFullBoard() {
+		// StdDraw.clear(Color.LIGHT_GRAY);
+		for (int x = 0; x < boardSize[0]; x++) {
+			for (int y = 0; y < boardSize[1]; y++) {
+				drawPosition(new int[] { x, y });
+			}
+		}
+	}
+
 	// takes in position and updates GUI at tile position pos
 	public static void drawPosition(int[] pos) {
+
 		String tile = "" + board[pos[0]][pos[1]];
-		String image = "images/tvl_";
+		String image = "images/tvl_"; // path to image to be drawn
+
 		if (pos[0] == playerPos[0] && pos[1] == playerPos[1]) {
+			// if player at pos
 			image += "s";
 		} else if (!isMoverAtPosition(pos)) {
 			switch (tile) {
@@ -554,10 +544,13 @@ public class SU24129429 {
 				image += "p0";
 				break;
 			default:
-				if(!hasLost) {
+				if (!hasLost) {
+					// draws a grey square if tile is empty
+					// this is disabled if the player loses in order to improve the appearance of
+					// the losing animation
 					StdDraw.setPenColor(Color.LIGHT_GRAY);
-					StdDraw.filledSquare(tileSize * pos[0] + tileOffset, boardSize[1] * tileSize - tileSize * pos[1] - tileOffset,
-							tileOffset);
+					StdDraw.filledSquare(tileSize * pos[0] + tileOffset,
+							boardSize[1] * tileSize - tileSize * pos[1] - tileOffset, tileOffset);
 				}
 				return;
 			}
@@ -581,26 +574,10 @@ public class SU24129429 {
 		}
 
 		image += ".png";
-		// System.out.println(image);
 		int xCoord = tileSize * pos[0] + tileOffset;
 		int yCoord = boardSize[1] * tileSize - tileSize * pos[1] - tileOffset;
 
 		StdDraw.picture(xCoord, yCoord, image);
-	}
-
-	// prints the board array (for debugging)
-	public static void printBoardDebug() {
-		System.out.println("Board:");
-		for (int y = 0; y < boardSize[1]; y++) {
-			for (int x = 0; x < boardSize[0]; x++) {
-				if (!isMoverAtPosition(new int[] { x, y })) {
-					System.out.print(board[x][y]);
-				} else {
-					System.out.print("m");
-				}
-			}
-			System.out.print("\n");
-		}
 	}
 
 	public static void printBoard() {
@@ -639,6 +616,103 @@ public class SU24129429 {
 			}
 			System.out.print("\n");
 		}
+	}
+
+	
+//-----------------BONUS FUNCTIONS------------------------------
+	
+	// plays an animation, taking in a totalTime to play and a framerate to play at
+	public static void playLosingAnimation(double totalTime, double framerate) {
+
+		// first part of animation (shifting the board down and to the left)
+		hasLost = true;
+		int[] drawOffset = new int[] { 0, 0 };
+		double timeStep = 1000.0 / framerate; // framerate of animation
+
+		long initial = System.currentTimeMillis(); // starting time of animation
+		long previous = initial;
+		long current = System.currentTimeMillis();
+
+		while (current - initial < totalTime) {
+
+			if (current - previous > timeStep) { // if more time has elapsed than the timeStep
+				previous = current;
+
+				drawOffset[0] += 4;
+				drawOffset[1] += 4;
+
+				// draws screen with an offset
+				StdDraw.setXscale(0 + drawOffset[0], boardSize[0] * tileSize + drawOffset[0]);
+				StdDraw.setYscale(0 + drawOffset[1], boardSize[1] * tileSize + drawOffset[1]);
+				drawFullBoard();
+			}
+			current = System.currentTimeMillis();
+		}
+
+		// reset scale of canvas to default
+		StdDraw.setXscale(0, boardSize[0] * tileSize);
+		StdDraw.setYscale(0, boardSize[1] * tileSize);
+
+		// Second part of animation which clears the screen and displays "You lost"
+		StdDraw.clear(Color.BLACK);
+		StdDraw.setPenColor(Color.WHITE);
+		StdDraw.setFont(new Font("Serif", Font.BOLD, 60));
+		StdDraw.text((boardSize[0] * tileSize) / 2, (boardSize[1] * tileSize) / 2, "You lost!");
+
+		// basic timer
+		long time = 4000; // duration of timer
+		initial = System.currentTimeMillis(); // starting time
+		while (true) {
+			if (System.currentTimeMillis() > time + initial)
+				break;
+		}
+		return;
+	}
+
+	// plays a winning animation which draws colored squares randomly on the screen
+	// takes in a number of squares and size (in pixels) of each square
+	public static void playWinningAnimation(int numSquares, double size) {
+		Color color;
+		StdDraw.setPenColor();
+
+		//booleans determining whether x or y coordinate used for colour coordinates
+		boolean r = Math.random()>0.5;
+		boolean g = Math.random()>0.5;
+		boolean b = Math.random()>0.5;
+		
+		for (int i = 0; i < numSquares; i++) {
+			double x = Math.random();
+			double y = Math.random();
+
+			double xPos = x * boardSize[0] * tileSize;
+			double yPos = y * boardSize[1] * tileSize;
+
+			color = new Color((float) (r?x:y), (float) (g?x:y), (float) (b?x:y));
+			// color is determined based on position of square on screen
+			// each colour coordinate ( R, G & B) can take either x or y as a parameter
+			// this is determined randomly
+			// the effect is that there are multiple different gradients possible
+
+			StdDraw.setPenColor(color);
+			StdDraw.filledSquare(xPos, yPos, size);
+		}
+
+		// draws the text "You've won!" on screen
+		StdDraw.setPenColor(Color.WHITE);
+		StdDraw.setFont(new Font("Serif", Font.BOLD, 50));
+		StdDraw.text((boardSize[0] * tileSize) / 2, (boardSize[1] * tileSize) / 2, "You've won!");
+
+		// a basic timer
+		long time = 4000; // duration of timer ( milliseconds )
+		long initial = System.currentTimeMillis();
+		while (true) {
+			if (System.currentTimeMillis() > time + initial)
+				break;
+		}
+	}
+	
+	public static void playSound(String filePath) {
+		
 	}
 
 }

@@ -27,10 +27,6 @@ public class SU24129429 {
 	public static final int tileOffset = tileSize / 2;
 	public static boolean hasLost = false;
 
-	public SU24129429(String[] args) {
-		main(args);
-	}
-
 	public static void main(String[] args) {
 
 		graphics = (args.length == 1);
@@ -69,7 +65,8 @@ public class SU24129429 {
 						System.out.println("You lost!");
 						playLosingAnimation(3000.0, 30);
 						System.exit(0);
-
+					}else {
+						StdAudio.play("sounds/out.wav");
 					}
 				}
 			}
@@ -709,10 +706,6 @@ public class SU24129429 {
 			if (System.currentTimeMillis() > time + initial)
 				break;
 		}
-	}
-	
-	public static void playSound(String filePath) {
-		
 	}
 
 }

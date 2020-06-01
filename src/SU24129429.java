@@ -58,16 +58,15 @@ public class SU24129429 {
 
 					if (("" + board[playerPos[0]][playerPos[1]]).equalsIgnoreCase("t")) { // checks if player on target
 						System.out.println("You won!");
-						playWinningAnimation(500, 40);
+						playWinningAnimation(700, 40);
 						System.exit(0);
 					}
 					if (!isLegal) {
 						System.out.println("You lost!");
 						playLosingAnimation(3000.0, 30);
 						System.exit(0);
-					}else {
-						StdAudio.play("sounds/out.wav");
 					}
+					
 				}
 			}
 		} else { // text mode
@@ -242,6 +241,10 @@ public class SU24129429 {
 			setPlayerPos(playerPos[0] + x, playerPos[1] + y);
 		}
 
+		if(graphics) {
+			playSound("sounds/move.wav");
+		}
+		
 		moveMovers(horizontal);
 		switchSwitches(horizontal);
 
@@ -629,14 +632,18 @@ public class SU24129429 {
 		long initial = System.currentTimeMillis(); // starting time of animation
 		long previous = initial;
 		long current = System.currentTimeMillis();
+		
+		playSound("sounds/lose.wav");
+		
+		int rate = 4;
 
 		while (current - initial < totalTime) {
 
 			if (current - previous > timeStep) { // if more time has elapsed than the timeStep
 				previous = current;
 
-				drawOffset[0] += 4;
-				drawOffset[1] += 4;
+				drawOffset[0] += rate;
+				drawOffset[1] += rate;
 
 				// draws screen with an offset
 				StdDraw.setXscale(0 + drawOffset[0], boardSize[0] * tileSize + drawOffset[0]);
@@ -669,6 +676,7 @@ public class SU24129429 {
 	// plays a winning animation which draws colored squares randomly on the screen
 	// takes in a number of squares and size (in pixels) of each square
 	public static void playWinningAnimation(int numSquares, double size) {
+		playSound("sounds/win.wav");
 		Color color;
 		StdDraw.setPenColor();
 
@@ -700,12 +708,19 @@ public class SU24129429 {
 		StdDraw.text((boardSize[0] * tileSize) / 2, (boardSize[1] * tileSize) / 2, "You've won!");
 
 		// a basic timer
-		long time = 4000; // duration of timer ( milliseconds )
+		long time = 5000; // duration of timer ( milliseconds )
 		long initial = System.currentTimeMillis();
 		while (true) {
 			if (System.currentTimeMillis() > time + initial)
 				break;
 		}
+	}
+	
+	public static void playSound(String filepath) {
+		//try catch only required since this does not work in eclipse but does in the command line
+		try {
+		StdAudio.play(filepath);
+		}catch(Exception e) {}
 	}
 
 }

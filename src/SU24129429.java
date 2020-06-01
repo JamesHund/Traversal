@@ -29,6 +29,10 @@ public class SU24129429 {
 
 	public static void main(String[] args) {
 
+		if(args.length == 0) {
+			System.out.println("enter 1 or 2 arguments");
+			return;
+		}
 		graphics = (args.length == 1);
 
 		if (graphics) { // graphics mode
@@ -418,6 +422,7 @@ public class SU24129429 {
 
 			if (graphics) {
 				drawPosition(port);
+				playSound("sounds/key.wav");
 			}
 		}
 	}
@@ -621,29 +626,28 @@ public class SU24129429 {
 	
 //-----------------BONUS FUNCTIONS------------------------------
 	
-	// plays an animation, taking in a totalTime to play and a framerate to play at
-	public static void playLosingAnimation(double totalTime, double framerate) {
+	// plays losing animation, animTime is the duration of the animation
+	public static void playLosingAnimation(double animTime, double framerate) {
 
 		// first part of animation (shifting the board down and to the left)
 		hasLost = true;
 		int[] drawOffset = new int[] { 0, 0 };
-		double timeStep = 1000.0 / framerate; // framerate of animation
+		double timeStep = 1000.0 / framerate; // time between drawcalls
 
 		long initial = System.currentTimeMillis(); // starting time of animation
 		long previous = initial;
 		long current = System.currentTimeMillis();
+		int pixelDiff = 4;
 		
 		playSound("sounds/lose.wav");
 		
-		int rate = 4;
-
-		while (current - initial < totalTime) {
+		while (current - initial < animTime) {
 
 			if (current - previous > timeStep) { // if more time has elapsed than the timeStep
 				previous = current;
 
-				drawOffset[0] += rate;
-				drawOffset[1] += rate;
+				drawOffset[0] += pixelDiff;
+				drawOffset[1] += pixelDiff;
 
 				// draws screen with an offset
 				StdDraw.setXscale(0 + drawOffset[0], boardSize[0] * tileSize + drawOffset[0]);
@@ -664,8 +668,8 @@ public class SU24129429 {
 		StdDraw.text((boardSize[0] * tileSize) / 2, (boardSize[1] * tileSize) / 2, "You lost!");
 
 		// basic timer
-		long time = 4000; // duration of timer
-		initial = System.currentTimeMillis(); // starting time
+		long time = 4000; // duration of timer (milliseconds)
+		initial = System.currentTimeMillis(); // starting time of timer
 		while (true) {
 			if (System.currentTimeMillis() > time + initial)
 				break;
@@ -708,7 +712,7 @@ public class SU24129429 {
 		StdDraw.text((boardSize[0] * tileSize) / 2, (boardSize[1] * tileSize) / 2, "You've won!");
 
 		// a basic timer
-		long time = 5000; // duration of timer ( milliseconds )
+		long time = 5000; // duration of timer (milliseconds)
 		long initial = System.currentTimeMillis();
 		while (true) {
 			if (System.currentTimeMillis() > time + initial)
@@ -716,8 +720,9 @@ public class SU24129429 {
 		}
 	}
 	
+	//wrapper function for StdAudio.play (allowing the program to continue running if an error occurs
+	//only required since this does not work in eclipse but works in the command line
 	public static void playSound(String filepath) {
-		//try catch only required since this does not work in eclipse but does in the command line
 		try {
 		StdAudio.play(filepath);
 		}catch(Exception e) {}
